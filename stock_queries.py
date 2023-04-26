@@ -1,6 +1,5 @@
-from polygon_queries import _stock_query as polygon_stock_query
 from yfinance_queries import _stock_query as yfinance_stock_query
-from datetime import date, timedelta
+from datetime import timedelta
 
 
 # https://medium.com/geekculture/the-best-free-stock-market-data-apis-available-in-2021-1ecfa51ee619
