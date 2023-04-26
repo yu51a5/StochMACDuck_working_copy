@@ -52,12 +52,12 @@ indicator_curves = {
 ############################################################################
 def stochD_sorting_function(df):
   stochD = get_tail_of_a_column(df, column_name="stochD")
-  signal_2 = get_tail_of_a_column(df, column_name='signal', how_many=2)
+  histogram_ = get_tail_of_a_column(df, column_name='histogram', how_many=2)
 
   stoch_distance = -abs(50. - stochD)
-  signal_diff = 0. if signal_2[0] * signal_2[1] >= 0. else (signal_2[0] - signal_2[1])
+  histogram_diff = 0. if histogram_[0] * histogram_[1] >= 0. else -abs(histogram_[0] - histogram_[1])
   
-  result = [signal_diff, stoch_distance if stoch_distance < 40. else 0., stoch_distance]
+  result = [stoch_distance if stoch_distance < -40. else 0., histogram_diff, stoch_distance]
   return result
   
 ############################################################################

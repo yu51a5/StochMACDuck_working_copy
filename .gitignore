@@ -1,3 +1,10 @@
+plots_StochMACDuck.jpg
+excel_StochMACDuck.xlsx
+.replit
+poetry.lock
+replit.nix
+pyproject.toml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
