@@ -1,8 +1,7 @@
 from matplotlib_plotting import plot_prices_and_indicators
-import pandas as pd
 
 from settings import all_tickers, how_many_days_to_plot, last_date, how_many_calendar_days_of_data_to_fetch, max_qty_assets_to_plot
-from auxiliary import time_now, datetime_now
+from auxiliary import time_now
 from stock_queries import stock_query
 from indicators import compute_indicators_and_summary
 from number_files import save_number_files

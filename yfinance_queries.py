@@ -1,5 +1,4 @@
 import yfinance as yf
-import pandas as pd
 # see https://pypi.org/project/yfinance/
 
 def _stock_query(stock_ticker, first_date, last_date):
