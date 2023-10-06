@@ -17,4 +17,11 @@ def _stock_query(stock_ticker, first_date, last_date):
     result.drop(result.tail(1).index,inplace=True)
   
   return result
+
+def get_longname(stock_ticker):
+  ticker_obj = yf.Ticker(stock_ticker)
+  # if ticker_obj.info fails, run the following line in Shell
+  # pip install --upgrade yfinance 
+  company_name = ticker_obj.info['longName']
+  return company_name
   

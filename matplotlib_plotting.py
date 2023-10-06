@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from settings import plot_height_inches, chart_color, plot_filename
 from auxiliary import datetime_now
 from indicators import indicator_curves
+from yfinance_queries import get_longname 
 
 ############################################################################
 def plot_prices_and_indicators(history_indicators, indicator_info):
@@ -11,7 +12,7 @@ def plot_prices_and_indicators(history_indicators, indicator_info):
   stock_qty = len(history_indicators)
 
   fig, axes = plt.subplots(1+len(indicator_curves), stock_qty, sharex=False, gridspec_kw={'hspace': 0})
-  fig.suptitle('Prices and Indicators plotted by StochMACDuck ' + datetime_now())
+  fig.suptitle('Prices and Indicators plotted by StochMACDuck ' + datetime_now(), x=0.005, ha='left')
   for i, (ticker, prices_df_2) in enumerate(history_indicators.items()):
     _candle_plot(ax=axes[0][i], ticker=ticker, prices=prices_df_2)
     for iic, indicator in enumerate(indicator_info.keys()):
@@ -69,6 +70,6 @@ def _candle_plot(ax, ticker, prices, width1=.8, width2=.1):
 
   #rotate x-axis tick labels
   #_rotate_xticks(ax)
-  ax.set_title(ticker)
+  ax.set_title(ticker + ' (' + get_longname(ticker) + ')')
   ax.set_ylabel('Prices')
   

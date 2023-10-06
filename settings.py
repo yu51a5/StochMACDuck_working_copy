@@ -25,8 +25,7 @@ all_tickers = ["000001.SS", "AAPL",
   "SCCO", "SDY.L", "SMPL", "SOYB.L", "SPOT", "SRP.L", "TGA.JO", "TLSA",
   "TPK.L", "TRN.L", "TSCO.L", "TSLA", "U-UN.TO", "UJO.L", "UL", "UNG", "URA",
   "VOD", "VRS.L", "VTU.L", "VZ", "WBX", "WCC", "WG.L", "WH", "WMT", "WSO",
-  "WTB.L", "XTRA.TO", "YINN"
-]
+  "WTB.L", "XTRA.TO", "YINN"]
 
 # ['TSCO.L', 'SANOFI.NS', "LLOY.L", 'AAPL']
 # FAILURES: "0LKC.IL", "280930.KS",
@@ -35,6 +34,8 @@ all_tickers = ["000001.SS", "AAPL",
 plot_height_inches = 6
 plot_filename = "plots_StochMACDuck.jpg"
 excel_filename = "excel_StochMACDuck.xlsx"
+# colors: https://matplotlib.org/stable/gallery/color/named_colors.html
+# linestyles: https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html
 chart_color = {
   'stochD': 'blue',
   'stochK': ['magenta', 'dotted'],
