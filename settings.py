@@ -2,9 +2,10 @@ from datetime import date
 
 ############################################################################
 how_many_days_to_plot = 30
-max_qty_assets_to_plot = 30
+max_qty_assets_to_plot = 50
 last_date = date.today()
 how_many_calendar_days_of_data_to_fetch = how_many_days_to_plot + 60 # should be enough in most cases
+
 
 ############################################################################
 indicator_name_parameters = {
@@ -31,9 +32,13 @@ all_tickers = ["000001.SS", "AAPL",
 # FAILURES: "0LKC.IL", "280930.KS",
 
 ############################################################################
+max_digits_for_price = 5
 plot_height_inches = 6
+max_title_length = 50
 plot_filename = "plots_StochMACDuck.jpg"
-excel_filename = "excel_StochMACDuck.xlsx"
+excel_filename = "files_with_numbers/excel_StochMACDuck.xlsx"
+info_filename = 'files_with_numbers/info_df'
+last_date_filename = 'files_with_numbers/last_date_data'
 # colors: https://matplotlib.org/stable/gallery/color/named_colors.html
 # linestyles: https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html
 chart_color = {

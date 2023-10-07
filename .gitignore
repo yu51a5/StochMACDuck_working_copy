@@ -4,6 +4,7 @@ excel_StochMACDuck.xlsx
 poetry.lock
 replit.nix
 pyproject.toml
+files_with_numbers/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

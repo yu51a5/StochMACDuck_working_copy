@@ -8,6 +8,7 @@ from number_files import save_number_files
 
 ############################################################################
 history_indicators = {}
+current_prices = {}
 print('\nStarted to fetch data ' + time_now())
 for ticker in all_tickers:
   history_indicators[ticker] = stock_query(stock_ticker=ticker, last_date=last_date, how_many_calendar_days_of_data_to_fetch=how_many_calendar_days_of_data_to_fetch)
@@ -28,8 +29,8 @@ save_number_files(last_date_data=last_date_data, history_indicators=history_indi
 
 ############################################################################
 print(
-  '\nStarted to plot ' + time_now(),
-  '\nIf it takes a while AND CPU and RAM - see the bottom left corner of the screen - are both idle, reload your browser window'
+  '\nStarted to plot ' + time_now() + '. It could take a couple of minutes.',
+  '\nOnce there is a "Completed" message right below this line, you can download the jpg file that displays the plots.'
 )
 what_to_plot = {}
 q = 0
@@ -39,3 +40,5 @@ for ticker, values in history_indicators.items():
   if q == max_qty_assets_to_plot:
     break
 plot_prices_and_indicators(what_to_plot, indicator_info)
+
+print(f'Completed {time_now()}!')

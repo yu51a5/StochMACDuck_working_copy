@@ -13,8 +13,16 @@ def _stock_query(stock_ticker, first_date, last_date):
   result.index = index
   #history_indicators[ticker].index = history_indicators[ticker].index.tz_localize(None)
   result['Data Date'] = result.index.strftime('%Y-%m-%d')
+  # https://stackoverflow.com/questions/61104362/how-to-get-actual-stock-prices-with-yfinance
+  # current_price = stock.info.get('regularMarketPrice', stock.info.get('currentPrice', result['close'].iloc[-1]))
+  #print(result.tail(1))
+  #print('current prices for', stock_ticker, current_price, result['close'].iloc[-1], (current_price / result['close'].iloc[-1] - 1))
   if max([abs( result[label].iloc[-1]) for label in ["open", "high", "low"]]) < 1E-8:
-    result.drop(result.tail(1).index,inplace=True)
+    result['open'].iloc[-1] = result['close'].iloc[-2]
+    result['low' ].iloc[-1] = result['low'  ].iloc[-2]
+    result['high'].iloc[-1] = result['high' ].iloc[-2]
+    #result.drop(result.tail(1).index,inplace=True)
+    #print('DROPS')
   
   return result
 
