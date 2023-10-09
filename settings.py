@@ -12,6 +12,7 @@ indicator_name_parameters = {
   'MACD': dict(fast=12, slow=26, signal_period=9),
   'Stochastic': dict(period=3, k_period=14, level_top=90.0, level_bottom=10.0)
 }
+unnecessary_column_names = ['Dividends', 'Stock Splits', 'Capital Gains', 'Data Date', 'level_bottom', 'level_top']
 
 ############################################################################
 all_tickers = ["000001.SS", "AAPL", 
@@ -38,6 +39,7 @@ max_title_length = 50
 plot_filename = "plots_StochMACDuck.jpg"
 excel_filename = "files_with_numbers/excel_StochMACDuck.xlsx"
 info_filename = 'files_with_numbers/info_df'
+tickers_long_names_filename = 'files_with_numbers/tickers_long_names'
 last_date_filename = 'files_with_numbers/last_date_data'
 # colors: https://matplotlib.org/stable/gallery/color/named_colors.html
 # linestyles: https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html

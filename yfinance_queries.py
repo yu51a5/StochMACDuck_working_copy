@@ -4,6 +4,9 @@ import yfinance as yf
 def _stock_query(stock_ticker, first_date, last_date):
   # Download the historical data for the asset
   stock = yf.Ticker(stock_ticker)
+
+  info = {key : stock.info.get(key, None) for key in ('longName', 'country', 'exchange', 'quoteType')}
+  
   result = stock.history(start=first_date, end=last_date)
   #dates = [d.date() for d in data.axes[0].to_pydatetime().tolist()]
   
@@ -24,12 +27,20 @@ def _stock_query(stock_ticker, first_date, last_date):
     #result.drop(result.tail(1).index,inplace=True)
     #print('DROPS')
   
-  return result
+  return info, result
 
 def get_longname(stock_ticker):
+  return get_info(stock_ticker, what_info='longName')
+
+def get_info(stock_ticker, what_info):
   ticker_obj = yf.Ticker(stock_ticker)
   # if ticker_obj.info fails, run the following line in Shell
   # pip install --upgrade yfinance 
-  company_name = ticker_obj.info['longName']
-  return company_name
+  if isinstance(what_info, str):
+    result = ticker_obj.info[what_info]
+  else:
+    result = [ticker_obj.info[w] for w in what_info] 
+  return result
+
+# get_info(stock_ticker, ('longName'))
   

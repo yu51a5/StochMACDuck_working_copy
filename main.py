@@ -8,16 +8,17 @@ from number_files import save_number_files
 
 ############################################################################
 history_indicators = {}
+info = {}
 current_prices = {}
 print('\nStarted to fetch data ' + time_now())
 for ticker in all_tickers:
-  history_indicators[ticker] = stock_query(stock_ticker=ticker, last_date=last_date, how_many_calendar_days_of_data_to_fetch=how_many_calendar_days_of_data_to_fetch)
-  print(f"{ticker}: {history_indicators[ticker].shape[0]} data points")
+  info[ticker], history_indicators[ticker] = stock_query(stock_ticker=ticker, last_date=last_date, how_many_calendar_days_of_data_to_fetch=how_many_calendar_days_of_data_to_fetch)
+  print(f"{ticker} ({', '.join([key + ': ' + str(value) for key, value in info[ticker].items()])}): {history_indicators[ticker].shape[0]} data points")
   
 print(f'Finished fetching data for {len(all_tickers)} tickers {time_now()}')
 
 ############################################################################
-print('\nStarted to compute indicators ' + time_now())
+print('\nStarted computing indicators ' + time_now())
 
 history_indicators, last_date_data, indicator_info = compute_indicators_and_summary(all_tickers, history_indicators)
 print(last_date_data)
@@ -25,7 +26,7 @@ print(last_date_data)
 print('Finished computing indicators ' + time_now())  
 
 ############################################################################
-save_number_files(last_date_data=last_date_data, history_indicators=history_indicators)
+save_number_files(last_date_data=last_date_data, info=info, history_indicators=history_indicators)
 
 ############################################################################
 print(
