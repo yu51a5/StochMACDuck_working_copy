@@ -1,22 +1,24 @@
+import os
 import pandas as pd
 from settings import folder_for_files, excel_filename, info_filename, last_date_filename, tickers_long_names_filename, unnecessary_column_names
 from auxiliary import datetime_now
 from indicators import stochD_sorting_function
 
-def print_all_formats(df, filename):
-  _filemame = os.path.join(folder_for_files, filename)
-  df.to_csv(l_filename + '.csv') 
-  with open(_filemame + '.txt', "w") as text_file:
+def print_all_formats(df, filename, excel_sheet_name=None, more_excel_data={}):
+  _filename = os.path.join(folder_for_files, filename)
+  df.to_csv(_filename + '.csv') 
+  with open(_filename + '.txt', "w") as text_file:
     text_file.write(df.to_string())
-  with pd.ExcelWriter(_filemame + '.xlsx') as writer:
-    df.to_excel(writer, sheet_name=filemame)
+  with pd.ExcelWriter(_filename + '.xlsx') as writer:
+    df.to_excel(writer, sheet_name=excel_sheet_name if excel_sheet_name else filename)
+    for sheet_name, (data_df, do_index) in more_excel_data.items():
+       data_df.to_excel(writer, sheet_name=sheet_name, index=do_index)
+      
+  return _filename
 
 def save_number_files(last_date_data, info, history_indicators):
 
   info_line = 'Prices and Indicators obtained by StochMACDuck ' + datetime_now()
-  
-  with open(info_filename + '.txt', "w") as text_file:
-    text_file.write(info_line)
 
   with open(last_date_filename + '.txt', "w") as text_file:
     # ticker_only_country_list = get_ticker_only_country_list(all_tickers)
@@ -45,20 +47,14 @@ def save_number_files(last_date_data, info, history_indicators):
     print("NO BAD ROWS")
   
   long_table.drop(columns=unnecessary_columns.columns, inplace=True)
-  long_table.sort_index(inplace=True, key=lambda key: stochD_sorting_function(history_indicators[key.str]))
+  # long_table.sort_index(inplace=True, key=lambda key: stochD_sorting_function(history_indicators[key.str]))
   #.sort_values(by, *, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last', ignore_index=False, key=None)
-  print_all_formats(long_table=problems, filename=tickers_long_names_filename)
+  print_all_formats(long_table, filename=tickers_long_names_filename)
   
   assert tickers_long_names_pd.index.equals(long_table.index)
   
-  with pd.ExcelWriter(excel_filename) as writer:  
-    info_df = pd.DataFrame([[info]], index=[' '], columns=[' ']) 
-    info_df.to_excel(writer, sheet_name='Info')
-  
-  with pd.ExcelWriter(excel_filename, mode='a') as writer:  
-    last_date_data.to_excel(writer, sheet_name='Summary')
-    for ticker, values in history_indicators.items():
-      values.to_excel(writer, sheet_name=ticker, index=False)
+  info_df = pd.DataFrame([[info_line]], index=[' '], columns=[' '])
+  print_all_formats(info_df, filename=excel_filename, excel_sheet_name='Info', more_excel_data={ticker : (values, False) for ticker, values in history_indicators.items()})
 
 
 #pd.concat([df1, df2], axis=1)
