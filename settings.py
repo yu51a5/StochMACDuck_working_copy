@@ -16,8 +16,8 @@ unnecessary_column_names = ['Dividends', 'Stock Splits', 'Capital Gains', 'Data 
 
 ############################################################################
 all_tickers = ["000001.SS", "AAPL", 
-  "AAZ.L", "AD.AS", "AE9.F", "AG", "AMAT", "AMD", "AMGN", "AMPS", "ATG.L",
-  "AUTO.L", "AV.L", "AZN", "BCS", "BDEV.L", "BHC", "BHP", "BP", "BRBR", "BTI",  "BUR", "C", "CF.TO", "CHMI", "CNA.L", "CO.PA", "COLR.BR", "CRH", "CVS",
+  "AAZ.L", "AD.AS", "AE9.F", "AG", "AMAT", "AMD", "AMGN", "AMPS", "ATG.L"]#,
+["AUTO.L", "AV.L", "AZN", "BCS", "BDEV.L", "BHC", "BHP", "BP", "BRBR", "BTI",  "BUR", "C", "CF.TO", "CHMI", "CNA.L", "CO.PA", "COLR.BR", "CRH", "CVS",
   "CVX", "CWK.L", "DAX", "DBC", "DEO", "DI6.DU", "DIS", "DNLI", "DRO.AX",
   "EVA", "EVN.AX", "EZJ.L", "FAST", "FCX", "FERG", "FNMA", "FNV", "GE",
   "GFTU.L", "GILD", "GLD.JO", "GOLD", "GRG.L", "GSK", "GWW", "HEAD.L", "HL",
@@ -36,11 +36,12 @@ all_tickers = ["000001.SS", "AAPL",
 max_digits_for_price = 5
 plot_height_inches = 6
 max_title_length = 50
+folder_for_files = 'files_with_numbers'
 plot_filename = "plots_StochMACDuck.jpg"
-excel_filename = "files_with_numbers/excel_StochMACDuck.xlsx"
-info_filename = 'files_with_numbers/info_df'
-tickers_long_names_filename = 'files_with_numbers/tickers_long_names'
-last_date_filename = 'files_with_numbers/last_date_data'
+excel_filename = "excel_StochMACDuck"
+info_filename = 'info_df'
+tickers_long_names_filename = 'tickers_long_names'
+last_date_filename = 'last_date_data'
 # colors: https://matplotlib.org/stable/gallery/color/named_colors.html
 # linestyles: https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html
 chart_color = {

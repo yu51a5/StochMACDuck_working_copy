@@ -1,6 +1,15 @@
 import pandas as pd
-from settings import excel_filename, info_filename, last_date_filename, tickers_long_names_filename, unnecessary_column_names
+from settings import folder_for_files, excel_filename, info_filename, last_date_filename, tickers_long_names_filename, unnecessary_column_names
 from auxiliary import datetime_now
+from indicators import stochD_sorting_function
+
+def print_all_formats(df, filename):
+  _filemame = os.path.join(folder_for_files, filename)
+  df.to_csv(l_filename + '.csv') 
+  with open(_filemame + '.txt', "w") as text_file:
+    text_file.write(df.to_string())
+  with pd.ExcelWriter(_filemame + '.xlsx') as writer:
+    df.to_excel(writer, sheet_name=filemame)
 
 def save_number_files(last_date_data, info, history_indicators):
 
@@ -8,11 +17,6 @@ def save_number_files(last_date_data, info, history_indicators):
   
   with open(info_filename + '.txt', "w") as text_file:
     text_file.write(info_line)
-    
-  last_date_data.to_csv(last_date_filename + '.csv') 
-
-  with open(last_date_filename + '.txt', "w") as text_file:
-    text_file.write(last_date_data.to_string())
 
   with open(last_date_filename + '.txt', "w") as text_file:
     # ticker_only_country_list = get_ticker_only_country_list(all_tickers)
@@ -31,22 +35,20 @@ def save_number_files(last_date_data, info, history_indicators):
   unnecessary_columns = long_table.filter(items=unnecessary_column_names)
   unnecessary_columns['Data Date'] = pd.to_datetime(unnecessary_columns['Data Date'])
   max_date = unnecessary_columns['Data Date'].max()
-  print(unnecessary_columns.loc[unnecessary_columns['Data Date'] < max_date])
-  print('Dividends', unnecessary_columns.loc[not(unnecessary_columns['Dividends'].isna()  or (abs(unnecessary_columns['Dividends'])< 1E-8))])
-  print('Stock Splits', unnecessary_columns.loc[not(unnecessary_columns['Stock Splits'].isna()  or (abs(unnecessary_columns['Stock Splits'])< 1E-8))])
-  print('Capital Gains', unnecessary_columns.loc[not(unnecessary_columns['Capital Gains'].isna()  or (abs(unnecessary_columns['Capital Gains'])< 1E-8))])
+  bad_rows = unnecessary_columns['Data Date'] < max_date
+  for what in unnecessary_columns.columns[:-3]:
+    bad_rows = (bad_rows) | (~((unnecessary_columns[what].isna()) | (abs(unnecessary_columns[what])< 1E-8)))
+  if bad_rows.any():
+    problems = unnecessary_columns.loc[bad_rows]
+    print_all_formats(df=problems, filename='problems')
+  else:
+    print("NO BAD ROWS")
   
-  print('unnecessary_columns', unnecessary_columns.dtypes, unnecessary_columns.columns)
-  print(unnecessary_columns)
-  long_table.drop(columns=unnecessary_column_names, inplace=True)
-    
-  assert tickers_long_names_pd.index.sort_values().equals(long_table.index.sort_values())
+  long_table.drop(columns=unnecessary_columns.columns, inplace=True)
+  long_table.sort_index(inplace=True, key=lambda key: stochD_sorting_function(history_indicators[key.str]))
+  #.sort_values(by, *, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last', ignore_index=False, key=None)
+  print_all_formats(long_table=problems, filename=tickers_long_names_filename)
   
-  with open(tickers_long_names_filename + '.txt', "w") as text_file:
-    text_file.write(long_table.to_string())
-  with pd.ExcelWriter(tickers_long_names_filename + '.xlsx') as writer:
-    long_table.to_excel(writer, sheet_name='TickersInfo')
-
   assert tickers_long_names_pd.index.equals(long_table.index)
   
   with pd.ExcelWriter(excel_filename) as writer:  
