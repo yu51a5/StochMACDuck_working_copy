@@ -20,7 +20,9 @@ def _stock_query(stock_ticker, first_date, last_date):
   # current_price = stock.info.get('regularMarketPrice', stock.info.get('currentPrice', result['close'].iloc[-1]))
   #print(result.tail(1))
   #print('current prices for', stock_ticker, current_price, result['close'].iloc[-1], (current_price / result['close'].iloc[-1] - 1))
-  if max([abs( result[label].iloc[-1]) for label in ["open", "high", "low"]]) < 1E-8:
+  extrapolate = max([abs( result[label].iloc[-1]) for label in ["open", "high", "low"]]) < 1E-8
+  info['extrapolated'] = extrapolate
+  if extrapolate:
     result['open'].iloc[-1] = result['close'].iloc[-2]
     result['low' ].iloc[-1] = result['low'  ].iloc[-2]
     result['high'].iloc[-1] = result['high' ].iloc[-2]

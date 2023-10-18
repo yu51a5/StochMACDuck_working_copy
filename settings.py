@@ -12,7 +12,7 @@ indicator_name_parameters = {
   'MACD': dict(fast=12, slow=26, signal_period=9),
   'Stochastic': dict(period=3, k_period=14, level_top=90.0, level_bottom=10.0)
 }
-unnecessary_column_names = ['Dividends', 'Stock Splits', 'Capital Gains', 'Data Date', 'level_bottom', 'level_top']
+unnecessary_column_names = ['Data Date']
 
 ############################################################################
 all_tickers = ["000001.SS", "AAPL", 
