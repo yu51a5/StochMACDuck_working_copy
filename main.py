@@ -26,7 +26,7 @@ print(last_date_data)
 print('Finished computing indicators ' + time_now())  
 
 ############################################################################
-save_number_files(last_date_data=last_date_data, info=info, history_indicators=history_indicators, problems=problems_df)
+save_number_files(last_date_data=last_date_data, history_indicators=history_indicators, problems=problems_df)
 
 ############################################################################
 print(

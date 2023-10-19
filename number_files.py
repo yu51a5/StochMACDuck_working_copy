@@ -1,8 +1,7 @@
-import os
+import os, shutil
 import pandas as pd
-from settings import folder_for_files, excel_filename, info_filename, last_date_filename, tickers_long_names_filename, unnecessary_column_names
+from settings import folder_for_files, excel_filename, tickers_long_names_filename
 from auxiliary import datetime_now
-from indicators import stochD_sorting_function
 
 def print_all_formats(df, filename, excel_sheet_name=None, more_excel_data={}):
   _filename = os.path.join(folder_for_files, filename)
@@ -16,13 +15,18 @@ def print_all_formats(df, filename, excel_sheet_name=None, more_excel_data={}):
       
   return _filename
 
-def save_number_files(last_date_data, info, history_indicators, problems):
+def save_number_files(last_date_data, history_indicators, problems):
+  
+  if os.path.isdir(folder_for_files):
+    shutil.rmtree(folder_for_files)
+
+  os.mkdir(folder_for_files)
 
   info_line = 'Prices and Indicators obtained by StochMACDuck ' + datetime_now()
 
-  with open(last_date_filename + '.txt', "w") as text_file:
+  #with open(last_date_filename + '.txt', "w") as text_file:
     # ticker_only_country_list = get_ticker_only_country_list(all_tickers)
-    links = [] #[f'https://www.marketwatch.com/investing/stock/{ticker}/charts?countryCode=UK' for ticker_only, country in all_tickers ]
+    #links = [] #[f'https://www.marketwatch.com/investing/stock/{ticker}/charts?countryCode=UK' for ticker_only, country in all_tickers ]
     # text_file.write('\n'.join(links))
 
   if len(problems):
