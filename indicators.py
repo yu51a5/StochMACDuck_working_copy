@@ -77,25 +77,22 @@ def compute_indicators_and_summary(info, history_indicators):
   problems = {}
 
   for ticker, all_dates_df in history_indicators.items():
-    problem_col_names = []
-    bad_rows = all_dates_df['open'] < 0
+    problem_by_name = {}
     for what in ['open', 'high', 'low', 'close',  'volume']:
       problem_here = (all_dates_df[what].isna()) | ((all_dates_df[what])< 1E-8)
       if problem_here.any():
-        problem_col_names.append(what)
-        bad_rows = (bad_rows) | problem_here
+        problem_by_name[what] = all_dates_df.loc[problem_here]
     for what in ['Dividends', 'Stock Splits']:
       is_zero = (abs(all_dates_df[what])< 1E-8)
       is_na = all_dates_df[what].isna() 
       problem_here = (~(((is_na) | (is_zero))))
       if problem_here.any():
-        problem_col_names.append(what)
-        bad_rows = (bad_rows) | problem_here
-    if bad_rows.any():
-      ticker_pb = ticker + ': ' + ', '.join(problem_col_names)
-      problems[ticker_pb] = all_dates_df.loc[bad_rows].drop(columns=['level_bottom', 'level_top', 'Data Date', 'MACD', 'signal', 'histogram', 'stochK', 'stochD'])
+        problem_by_name[what] = all_dates_df.loc[problem_here]
+    if problem_by_name:
+      problems[ticker] = pd.concat(problem_by_name, axis=0).reset_index(level=0).rename({'level_0':'flagged'}, axis=1)
+      problems[ticker].drop(columns=['level_bottom', 'level_top', 'Data Date', 'MACD', 'signal', 'histogram', 'stochK', 'stochD'])
       for k, v in info[ticker].items():
-        problems[ticker_pb][k] = v
+        problems[ticker][k] = v
 
     tail =  all_dates_df.tail(3)
     to_remove = [cn for cn in tail.columns if cn in ['level_bottom', 'level_top', 'Dividends', 'Stock Splits', 'Capital Gains', 'Data Date']]
@@ -135,5 +132,5 @@ def compute_indicators_and_summary(info, history_indicators):
   # long_table.sort_index(inplace=True, key=lambda key: stochD_sorting_function(history_indicators[key.str]))
   #.sort_values(by, *, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last', ignore_index=False, key=None)  
   
-  return history_indicators, last_date_data, indicator_info, problems_df
+  return history_indicators, long_table, indicator_info, problems_df
   
