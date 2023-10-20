@@ -4,7 +4,6 @@ import math
 from settings import plot_height_inches, chart_color, plot_filename, max_digits_for_price, max_title_length
 from auxiliary import datetime_now
 from indicators import indicator_curves
-from yfinance_queries import get_longname 
 
 ############################################################################
 def plot_prices_and_indicators(history_indicators, indicator_info):
@@ -15,8 +14,8 @@ def plot_prices_and_indicators(history_indicators, indicator_info):
 
   fig, axes = plt.subplots(1+len(indicator_curves), stock_qty, sharex=False, gridspec_kw={'hspace': 0})
   fig.suptitle('  Prices and Indicators plotted by StochMACDuck ' + datetime_now(), x=0, ha='left')
-  for i, (ticker, prices_df_2) in enumerate(history_indicators.items()):
-    _candle_plot(ax=axes[0][i], ticker=ticker, prices=prices_df_2)
+  for i, (ticker, (prices_df_2, info_ticker)) in enumerate(history_indicators.items()):
+    _candle_plot(ax=axes[0][i], ticker=ticker, prices=prices_df_2, info=info_ticker)
     for iic, indicator in enumerate(indicator_info.keys()):
       for ind_curve_name in indicator_curves[indicator]['curves']:
         if ind_curve_name not in prices_df_2:
@@ -51,7 +50,7 @@ def get_style(curve_name):
   return {'color' : chart_color[curve_name][0], 'linestyle' : chart_color[curve_name][1]}
 
 ############################################################################
-def _candle_plot(ax, ticker, prices, width1=.8, width2=.1):
+def _candle_plot(ax, ticker, prices, info, width1=.8, width2=.1):
   # source: https://www.statology.org/matplotlib-python-candlestick-chart/
   #plot up prices
   up = prices[prices.close >= prices.open]
@@ -75,7 +74,7 @@ def _candle_plot(ax, ticker, prices, width1=.8, width2=.1):
   last_close = prices["close"].iloc[-1]
   int_digits_qty = math.floor(math.log10(last_close)) + 1
   rounded_last_close = round(last_close, max(0, max_digits_for_price - int_digits_qty))
-  title = f'{ticker} ({rounded_last_close}, {get_longname(ticker)})'
+  title = f'{ticker} ({info["currency"]} {rounded_last_close}, {info["longName"]})'
   ax.set_title(title[:max_title_length])
   ax.set_ylabel('Prices')
   
