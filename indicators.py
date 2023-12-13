@@ -90,7 +90,6 @@ def compute_indicators_and_summary(info, history_indicators):
         problem_by_name[what] = all_dates_df.loc[problem_here]
     if problem_by_name:
       problems[ticker] = pd.concat(problem_by_name, axis=0).reset_index(level=0).rename({'level_0':'flagged'}, axis=1)
-      problems[ticker].drop(columns=['level_bottom', 'level_top', 'Data Date', 'MACD', 'signal', 'histogram', 'stochK', 'stochD'])
       for k, v in info[ticker].items():
         problems[ticker][k] = v
 
@@ -106,6 +105,7 @@ def compute_indicators_and_summary(info, history_indicators):
 
 
   problems_df = pd.concat(problems.values(), keys=problems.keys(), axis=0).reset_index(level=1)
+  problems_df = problems_df.drop(columns=['level_bottom', 'level_top', 'Data Date', 'MACD', 'signal', 'histogram', 'stochK', 'stochD'])
   
   last_date_data = pd.concat(flat_tails, axis=0).reset_index(level=0).rename({'level_0':'ticker'}, axis=1)
   # last_date_data.reset_index(inplace=True)
