@@ -9,6 +9,8 @@
 import requests
 import datetime
 import time
+import pandas as pd
+import io
 
 apiBase1= 'https://query1.finance.yahoo.com'
 apiBase = 'https://query2.finance.yahoo.com'
@@ -49,12 +51,8 @@ def get_symbol_history(symbol, first_date, last_date):
              "includeAdjustedClose" : "true",
              'crumb': credentials['crumb'] }
   response = requests.get(url, params=params, cookies=credentials['cookie'], headers=headers)
-  s, u = response.status_code, response.url
-  print(dir(response))
-  s1 = response.json()
-  s2 = response.json()['quoteResponse']
-  quotes = response.json()['quoteResponse']['result']
-  return quotes
+  result = pd.read_csv(io.StringIO(response.text))
+  return result
 
 get_symbol_history(symbol='AAPL', first_date=datetime.date(2023, 9, 13), last_date=datetime.date(2023, 12, 13))
 
