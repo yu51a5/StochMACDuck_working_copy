@@ -13,7 +13,7 @@ current_prices = {}
 print('\nStarted to fetch data ' + time_now())
 for ticker in all_tickers:
   info[ticker], history_indicators[ticker] = stock_query(stock_ticker=ticker, last_date=last_date, how_many_calendar_days_of_data_to_fetch=how_many_calendar_days_of_data_to_fetch)
-  print(f"{ticker} ({', '.join([key + ': ' + str(value) for key, value in info[ticker].items()])}): {history_indicators[ticker].shape[0]} data points")
+  print(f"{ticker} ({', '.join([key + ': ' + str(value) for key, value in info[ticker].items()])}): {history_indicators[ticker]['history'].shape[0]} data points")
   
 print(f'Finished fetching data for {len(all_tickers)} tickers {time_now()}')
 
