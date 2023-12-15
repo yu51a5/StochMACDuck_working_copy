@@ -11,7 +11,7 @@ def print_all_formats(df, filename, excel_sheet_name=None, more_excel_data={}):
   with pd.ExcelWriter(_filename + '.xlsx') as writer:
     df.to_excel(writer, sheet_name=excel_sheet_name if excel_sheet_name else filename)
     for sheet_name, (data_df, do_index) in more_excel_data.items():
-       data_df.to_excel(writer, sheet_name=sheet_name, index=do_index)
+       pass #data_df.to_excel(writer, sheet_name=sheet_name, index=do_index)
       
   return _filename
 

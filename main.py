@@ -36,7 +36,7 @@ print(
 what_to_plot = {}
 q = 0
 for ticker, values in history_indicators.items():
-  what_to_plot[ticker] = (values.tail(how_many_days_to_plot) if isinstance(how_many_days_to_plot, int) else values, info[ticker])
+  what_to_plot[ticker] = (values['history'].tail(how_many_days_to_plot) if isinstance(how_many_days_to_plot, int) else values['history'], info[ticker])
   q += 1
   if q == max_qty_assets_to_plot:
     break

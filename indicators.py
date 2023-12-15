@@ -1,7 +1,9 @@
 import pandas as pd
+import numpy as np
 import pandas_ta
 from settings import indicator_name_parameters
 from auxiliary import get_tail_of_a_column
+from datetime import datetime
 
 ############################################################################
 # https://stackoverflow.com/questions/48775841/pandas-ema-not-matching-the-stocks-ema
@@ -67,33 +69,31 @@ def compute_indicators_and_summary(info, history_indicators):
   for ticker in info:
     for indicator_name, indicator_parameters in indicator_name_parameters.items():
       ind_function = indicator_curves[indicator_name]['function']
-      ind_title[indicator_name], _ = ind_function(history_indicators[ticker],
+      ind_title[indicator_name], _ = ind_function(history_indicators[ticker]['history'],
                                                   **indicator_parameters)
   #history_indicators = dict(sorted(history_indicators.items(), key=lambda item: stochD_sorting_function(item[1])))
   
   ############################################################################  
   flat_tails = {}
 
-  problems = {}
+  multiindex = pd.MultiIndex(levels=[[],[],[]],
+                            codes=[[],[],[]],
+                           names={'Ticker': str, 'Date': datetime, 'Value Name': str})
+
+  problems_df = pd.DataFrame(columns={'Problem value' : float, 'Long name'  : str}, 
+                             index = multiindex)
 
   for ticker, all_dates_df in history_indicators.items():
-    problem_by_name = {}
-    for what in ['open', 'high', 'low', 'close',  'volume']:
-      problem_here = (all_dates_df[what].isna()) | ((all_dates_df[what])< 1E-8)
-      if problem_here.any():
-        problem_by_name[what] = all_dates_df.loc[problem_here]
+    for date, row in all_dates_df['history'].iterrows():
+      for what in all_dates_df['history'].columns:
+        value = row[what]
+        if (pd.isna(value)) or (value < 1E-8):
+          problems_df.loc[(ticker, date, what), :] =  pd.Series({'Long name' : info[ticker]['longName'], 'Problem value' : value})
     for what in ['Dividends', 'Stock Splits']:
-      is_zero = (abs(all_dates_df[what])< 1E-8)
-      is_na = all_dates_df[what].isna() 
-      problem_here = (~(((is_na) | (is_zero))))
-      if problem_here.any():
-        problem_by_name[what] = all_dates_df.loc[problem_here]
-    if problem_by_name:
-      problems[ticker] = pd.concat(problem_by_name, axis=0).reset_index(level=0).rename({'level_0':'flagged'}, axis=1)
-      for k, v in info[ticker].items():
-        problems[ticker][k] = v
+      for date, row in all_dates_df[what].iterrows():
+        problems_df.loc[(ticker, date, what), :] =  pd.Series({'Long name' : info[ticker]['longName'], 'Problem value' : row[0]})
 
-    tail =  all_dates_df.tail(3)
+    tail =  all_dates_df['history'].tail(3)
     to_remove = [cn for cn in tail.columns if cn in ['level_bottom', 'level_top', 'Dividends', 'Stock Splits', 'Capital Gains', 'Data Date']]
     tail = tail.drop(columns=to_remove)
     tail = tail.loc[tail.index[::-1]]
@@ -104,8 +104,6 @@ def compute_indicators_and_summary(info, history_indicators):
     flat_tails[ticker] = pd.DataFrame([tail_stack.to_numpy()],  columns=[f'{j}-{i}' for i, j in tail_stack.index])
 
 
-  problems_df = pd.concat(problems.values(), keys=problems.keys(), axis=0).reset_index(level=1)
-  problems_df = problems_df.drop(columns=['level_bottom', 'level_top', 'Data Date', 'MACD', 'signal', 'histogram', 'stochK', 'stochD'])
   
   last_date_data = pd.concat(flat_tails, axis=0).reset_index(level=0).rename({'level_0':'ticker'}, axis=1)
   # last_date_data.reset_index(inplace=True)
