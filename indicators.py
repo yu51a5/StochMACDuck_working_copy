@@ -64,54 +64,55 @@ def stochD_sorting_function(df):
   
 ############################################################################
 
-def compute_indicators_and_summary(info, history_indicators):
+def compute_indicators_and_summary(info, history_indicators, dividends, splits):
+
+  ############################################################################
+  # compute indicator values
   ind_title = {}
   for ticker in info:
     for indicator_name, indicator_parameters in indicator_name_parameters.items():
       ind_function = indicator_curves[indicator_name]['function']
-      ind_title[indicator_name], _ = ind_function(history_indicators[ticker]['history'],
+      ind_title[indicator_name], _ = ind_function(history_indicators[ticker],
                                                   **indicator_parameters)
-  #history_indicators = dict(sorted(history_indicators.items(), key=lambda item: stochD_sorting_function(item[1])))
+  history_indicators = dict(sorted(history_indicators.items(), key=lambda item: stochD_sorting_function(item[1])))
+  indicator_info = {ind_name: {'title' : ind_title[ind_name]} for ind_name in indicator_curves.keys()}
   
   ############################################################################  
-  flat_tails = {}
-
+  # find problems
   multiindex = pd.MultiIndex(levels=[[],[],[]],
-                            codes=[[],[],[]],
-                           names={'Ticker': str, 'Date': datetime, 'Value Name': str})
+                             codes=[[],[],[]],
+                             names={'Ticker': str, 'Date': datetime, 'Value Name': str})
 
   problems_df = pd.DataFrame(columns={'Problem value' : float, 'Long name'  : str}, 
                              index = multiindex)
 
-  for ticker, all_dates_df in history_indicators.items():
-    for date, row in all_dates_df['history'].iterrows():
-      for what in all_dates_df['history'].columns:
+  for ticker, history_indicators_one_ticker in history_indicators.items():
+    for date, row in history_indicators_one_ticker.iterrows():
+      for what in history_indicators_one_ticker.columns:
         value = row[what]
         if (pd.isna(value)) or (value < 1E-8):
           problems_df.loc[(ticker, date, what), :] =  pd.Series({'Long name' : info[ticker]['longName'], 'Problem value' : value})
-    for what in ['Dividends', 'Stock Splits']:
-      for date, row in all_dates_df[what].iterrows():
+  for what, df_dict in (('Dividends', dividends), ('Stock Splits', splits)):
+    for ticker, df in df_dict.items():
+      for date, row in df.iterrows():
         problems_df.loc[(ticker, date, what), :] =  pd.Series({'Long name' : info[ticker]['longName'], 'Problem value' : row[0]})
 
-    tail =  all_dates_df['history'].tail(3)
-    to_remove = [cn for cn in tail.columns if cn in ['level_bottom', 'level_top', 'Dividends', 'Stock Splits', 'Capital Gains', 'Data Date']]
-    tail = tail.drop(columns=to_remove)
+  ############################################################################  
+  # put together the values for the last 3 dates -> last_date_data
+  flat_tails = {}
+  for ticker, all_dates_df in history_indicators.items():
+    tail =  all_dates_df.tail(3)
+    tail = tail.drop(columns=['level_bottom', 'level_top'])
     tail = tail.loc[tail.index[::-1]]
     tail.reset_index(inplace=True)
     
     tail_stack = tail.stack()
     # We recommend using DataFrame.to_numpy() instead. https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.values.html
     flat_tails[ticker] = pd.DataFrame([tail_stack.to_numpy()],  columns=[f'{j}-{i}' for i, j in tail_stack.index])
-
-
   
   last_date_data = pd.concat(flat_tails, axis=0).reset_index(level=0).rename({'level_0':'ticker'}, axis=1)
   # last_date_data.reset_index(inplace=True)
   last_date_data = last_date_data.set_index('ticker')
-
-  print('last_date_data', last_date_data)
-  
-  indicator_info = {ind_name: {'title' : ind_title[ind_name]} for ind_name in indicator_curves.keys()}
 
   for t in info:
     columns = [k for k in info[t].keys()]

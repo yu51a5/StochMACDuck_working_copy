@@ -6,6 +6,11 @@
 # https://stackoverflow.com/questions/76065035/yahoo-finance-v7-api-now-requiring-cookies-python
 # https://www.datapears.com/post/connect-to-yahoo-finance-building-a-stock-market-tracker
 
+# https://medium.com/geekculture/the-best-free-stock-market-data-apis-available-in-2021-1ecfa51ee619
+# https://www.xignite.com/news/best-6-free-and-paid-stock-market-apis/
+# https://rapidapi.com/blog/best-stock-api/
+# https://finnhub.io
+
 import requests
 import datetime
 import time
@@ -22,7 +27,7 @@ headers = {
 
 credentials = None
 # {v : np.float64 for v in (['Open', 'High', 'Low', 'Close', 'Volume'] if k == "history" else ["Dividends" if k == "div" else 'Stock Splits'])}.update
-data_names = {"div" : 'Dividends', "split" : 'Stock Splits', "history" : "history"}
+data_names = {"div" : 'Dividends', "split" : 'Splits', "history" : "history"}
 
 #https://query1.finance.yahoo.com/v7/finance/download/AAPL?period1=1694649600&period2=1702425600&interval=1d&events=div&includeAdjustedClose=true
 #https://query1.finance.yahoo.com/v7/finance/download/AAPL?period1=1694649600&period2=1702425600&interval=1d&events=div&includeAdjustedClose=true&crumb=auA1R4VT1hs
@@ -63,13 +68,12 @@ def get_symbol_history(symbol, first_date, last_date, interval="1d"):
 
   return result_dict
 
-def _stock_query(stock_ticker, first_date, last_date):
+def stock_query(stock_ticker, first_date, last_date):
 
   stock_info = get_symbol_quote(symbols=[stock_ticker])[0]
   info = {key : stock_info.get(key, None) for key in ('longName', 'exchange', 'quoteType', 'currency', 'marketState')}
   
-  result_dict = get_symbol_history(symbol=stock_ticker, first_date=first_date, last_date=last_date) #stock.history(start=first_date, end=last_date)
-  #dates = [d.date() for d in data.axes[0].to_pydatetime().tolist()]
+  result_dict = get_symbol_history(symbol=stock_ticker, first_date=first_date, last_date=last_date) 
 
   result_dict["history"].rename({s : s.lower() for s in ['Open', 'High', 'Low', 'Close', 'Volume']}, axis=1, inplace=True)
   #result.index = result.index.tz_localize(tz=None)
@@ -110,6 +114,6 @@ def _stock_query(stock_ticker, first_date, last_date):
         result_dict["history"].at[index_minus_one, label] = result_dict["history"].at[index_minus_two, 'close' if label == 'open' else label]
         extrapolated_minus_one = True
   
-  return info, result_dict
+  return info, result_dict["history"], result_dict['Dividends'], result_dict['Splits']
 
   

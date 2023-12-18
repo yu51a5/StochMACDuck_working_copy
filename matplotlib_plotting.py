@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import math 
+import pandas as pd
 
 from settings import plot_height_inches, chart_color, plot_filename, max_digits_for_price, max_title_length
 from auxiliary import datetime_now
@@ -71,7 +72,10 @@ def _candle_plot(ax, ticker, prices, info, width1=.8, width2=.1):
 
   #rotate x-axis tick labels
   #_rotate_xticks(ax)
-  last_close = prices["close"].iloc[-1]
+  for i in range(len(prices.index)):
+    last_close = prices["close"].iloc[-1-i]
+    if not pd.isna(last_close):
+      break
   int_digits_qty = math.floor(math.log10(last_close)) + 1
   rounded_last_close = round(last_close, max(0, max_digits_for_price - int_digits_qty))
   title = f'{ticker} ({info["currency"]} {rounded_last_close}, {info["longName"]})'
