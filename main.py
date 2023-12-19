@@ -17,9 +17,18 @@ dividends = {}
 splits = {}
 print('\nStarted to fetch data ' + time_now())
 first_date = last_date - timedelta(days=how_many_calendar_days_of_data_to_fetch)
+not_found = []
 for ticker in all_tickers:
   info[ticker], history_indicators[ticker], dividends[ticker], splits[ticker] = stock_query(stock_ticker=ticker, last_date=last_date, first_date=first_date)
-  print(f"{ticker} ({', '.join([key + ': ' + str(value) for key, value in info[ticker].items()])}): {history_indicators[ticker].shape[0]} data points")
+  if not info[ticker]:
+    not_found.append(ticker)
+    del info[ticker]
+    del history_indicators[ticker]
+    del dividends[ticker]
+    del splits[ticker]
+    print(f"Could not find any information about {ticker}")
+  else:
+    print(f"{ticker} ({', '.join([key + ': ' + str(value) for key, value in info[ticker].items()])}): {history_indicators[ticker].shape[0]} data points")
   
 print(f'Finished fetching data for {len(all_tickers)} tickers {time_now()}')
 

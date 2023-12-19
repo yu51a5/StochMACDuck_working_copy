@@ -2,7 +2,8 @@ import matplotlib.pyplot as plt
 import math 
 import pandas as pd
 
-from settings import plot_height_inches, chart_color, plot_filename, max_digits_for_price, max_title_length
+from settings import plot_height_inches, chart_color, plot_filename, max_digits_for_price, max_title_length,\
+                     min_gap_current_price
 from auxiliary import datetime_now
 from indicators import indicator_curves
 
@@ -68,17 +69,25 @@ def _candle_plot(ax, ticker, prices, info, width1=.8, width2=.1):
              bottom=bottom,
              **get_style(curve_name=curve_name))
 
-  ax.plot(prices.index, prices.close, **get_style(curve_name='stock_mid'), zorder=-.1)
+  ax.plot(prices.index, prices.close, **get_style(curve_name='stock_close'), zorder=-.1)
+  xlim, ylim = ax.get_xlim(), ax.get_ylim()
 
-  #rotate x-axis tick labels
-  #_rotate_xticks(ax)
-  for i in range(len(prices.index)):
-    last_close = prices["close"].iloc[-1-i]
-    if not pd.isna(last_close):
-      break
-  int_digits_qty = math.floor(math.log10(last_close)) + 1
-  rounded_last_close = round(last_close, max(0, max_digits_for_price - int_digits_qty))
-  title = f'{ticker} ({info["currency"]} {rounded_last_close}, {info["longName"]})'
+  current_price = info['current_price']
+
+  ax.plot((prices.index[0], prices.index[-1]), (current_price, current_price), **get_style(curve_name='current_price'))
+  
+  dist = (current_price - ylim[0]) / (ylim[1] - ylim[0])
+  if dist > (1 - min_gap_current_price):
+    ylim = (ylim[0], ylim[0] + (current_price - ylim[0]) / (1 - min_gap_current_price))
+  elif dist < min_gap_current_price:
+    ylim = (ylim[1] - (-current_price+ ylim[1]) / (1 - min_gap_current_price), ylim[1])
+
+  ax.set_xlim(xlim)
+  ax.set_ylim(ylim)
+
+  int_digits_qty = math.floor(math.log10(current_price)) + 1
+  rounded_current_price = round(current_price, max(0, max_digits_for_price - int_digits_qty))
+  title = f'{ticker} ({info["currency"]} {rounded_current_price}, {info["longName"]})'
   ax.set_title(title[:max_title_length])
   ax.set_ylabel('Prices')
   

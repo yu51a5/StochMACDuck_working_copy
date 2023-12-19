@@ -29,6 +29,7 @@ credentials = None
 # {v : np.float64 for v in (['Open', 'High', 'Low', 'Close', 'Volume'] if k == "history" else ["Dividends" if k == "div" else 'Stock Splits'])}.update
 data_names = {"div" : 'Dividends', "split" : 'Splits', "history" : "history"}
 
+#"https://query1.finance.yahoo.com/v7/finance/chart/AAPL?period1=1694649600&period2=1702425600&interval=1d&indicators=RSI&includeTimestamps=true"
 #https://query1.finance.yahoo.com/v7/finance/download/AAPL?period1=1694649600&period2=1702425600&interval=1d&events=div&includeAdjustedClose=true
 #https://query1.finance.yahoo.com/v7/finance/download/AAPL?period1=1694649600&period2=1702425600&interval=1d&events=div&includeAdjustedClose=true&crumb=auA1R4VT1hs
 
@@ -70,7 +71,12 @@ def get_symbol_history(symbol, first_date, last_date, interval="1d"):
 
 def stock_query(stock_ticker, first_date, last_date):
 
-  stock_info = get_symbol_quote(symbols=[stock_ticker])[0]
+  stock_info = get_symbol_quote(symbols=[stock_ticker])
+
+  if not stock_info:
+    return None, None, None, None
+    
+  stock_info = stock_info[0]
   info = {key : stock_info.get(key, None) for key in ('longName', 'exchange', 'quoteType', 'currency', 'marketState')}
   
   result_dict = get_symbol_history(symbol=stock_ticker, first_date=first_date, last_date=last_date) 
@@ -79,40 +85,25 @@ def stock_query(stock_ticker, first_date, last_date):
   #result.index = result.index.tz_localize(tz=None)
   #history_indicators[ticker].index = history_indicators[ticker].index.tz_localize(None)
   # https://stackoverflow.com/questions/61104362/how-to-get-actual-stock-prices-with-yfinance
-  current_prices = [stock_info.get('regularMarketPrice', None), stock_info.get('currentPrice', None), result_dict["history"]['close'].iloc[-1]]
+
+  df = result_dict["history"]
+  while len(df.index):
+    for label in ['close', 'open']:
+      current_price = df[label].iloc[-1]
+      if current_price is not None:
+        break
+    df = df.drop(index=df.index[-1])
+    
+  current_prices = [stock_info.get('regularMarketPrice', None), stock_info.get('currentPrice', None)]
   if (current_prices[0] is not None) or (current_prices[1] is not None):
     if (current_prices[0] is not None):
       if (current_prices[1] is not None):
-        assert 1, ()
+        assert abs(current_prices[0] - current_prices[1]) < 1E-8, "current prices are not equal"
       current_price = current_prices[0]
     else:
       current_price = current_prices[1]
-    extrapolate = True
-  else:
-    current_price = result['close'].iloc[-1]
-    
-    extrapolate = max([abs( result_dict["history"][label].iloc[-1]) for label in ["open", "high", "low"]]) < 1E-8
-    
   
-  print(current_price)
-  #print(result.tail(1))
-  #print('current prices for', stock_ticker, current_price, result['close'].iloc[-1], (current_price / result['close'].iloc[-1] - 1))
-  #print(result.iloc[-1])
-  
-  info['extrapolated'] = extrapolate
-  
-  extrapolated_minus_one = False
-  index_minus_one = result_dict["history"].index[-1]
-  index_minus_two = result_dict["history"].index[-2]
-  if (result_dict["history"].at[index_minus_one, 'open'] > 1E-8) and (result_dict["history"].at[index_minus_one, 'close'] < 1E-8):
-    pass
-  elif result_dict["history"].at[index_minus_one, 'close'] < 1E-8:
-     DataFrame.drop(index=index_minus_one)
-  else:
-    for label in ["open", "high", "low"]:
-      if result_dict["history"].at[index_minus_one, label] < 1E-8:
-        result_dict["history"].at[index_minus_one, label] = result_dict["history"].at[index_minus_two, 'close' if label == 'open' else label]
-        extrapolated_minus_one = True
+  info['current_price'] = current_price
   
   return info, result_dict["history"], result_dict['Dividends'], result_dict['Splits']
 

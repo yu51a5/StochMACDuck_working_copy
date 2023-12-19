@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 import pandas_ta
-from settings import indicator_name_parameters
-from auxiliary import get_tail_of_a_column
+from settings import indicator_name_parameters, problem_column_name
+from auxiliary import get_tail_of_a_column, is_nan_or_not_positive
 from datetime import datetime
 
 ############################################################################
@@ -65,6 +65,26 @@ def stochD_sorting_function(df):
 ############################################################################
 
 def compute_indicators_and_summary(info, history_indicators, dividends, splits):
+  
+  ############################################################################  
+  # find problems
+  multiindex = pd.MultiIndex(levels=[[],[],[]],
+                             codes=[[],[],[]],
+                             names={'Ticker': str, 'Date': datetime, 'Value Name': str})
+
+  problems_df = pd.DataFrame(columns={problem_column_name : float, 'Long name'  : str}, 
+                             index = multiindex)
+
+  for ticker, history_indicators_one_ticker in history_indicators.items():
+    for date, row in history_indicators_one_ticker.iterrows():
+      for what in history_indicators_one_ticker.columns:
+        value = row[what]
+        if is_nan_or_not_positive(value):
+          problems_df.loc[(ticker, date, what), :] =  pd.Series({'Long name' : info[ticker]['longName'], problem_column_name : value})
+  for what, df_dict in (('Dividends', dividends), ('Stock Splits', splits)):
+    for ticker, df in df_dict.items():
+      for date, row in df.iterrows():
+        problems_df.loc[(ticker, date, what), :] =  pd.Series({'Long name' : info[ticker]['longName'], problem_column_name : row[0]})
 
   ############################################################################
   # compute indicator values
@@ -76,26 +96,6 @@ def compute_indicators_and_summary(info, history_indicators, dividends, splits):
                                                   **indicator_parameters)
   history_indicators = dict(sorted(history_indicators.items(), key=lambda item: stochD_sorting_function(item[1])))
   indicator_info = {ind_name: {'title' : ind_title[ind_name]} for ind_name in indicator_curves.keys()}
-  
-  ############################################################################  
-  # find problems
-  multiindex = pd.MultiIndex(levels=[[],[],[]],
-                             codes=[[],[],[]],
-                             names={'Ticker': str, 'Date': datetime, 'Value Name': str})
-
-  problems_df = pd.DataFrame(columns={'Problem value' : float, 'Long name'  : str}, 
-                             index = multiindex)
-
-  for ticker, history_indicators_one_ticker in history_indicators.items():
-    for date, row in history_indicators_one_ticker.iterrows():
-      for what in history_indicators_one_ticker.columns:
-        value = row[what]
-        if (pd.isna(value)) or (value < 1E-8):
-          problems_df.loc[(ticker, date, what), :] =  pd.Series({'Long name' : info[ticker]['longName'], 'Problem value' : value})
-  for what, df_dict in (('Dividends', dividends), ('Stock Splits', splits)):
-    for ticker, df in df_dict.items():
-      for date, row in df.iterrows():
-        problems_df.loc[(ticker, date, what), :] =  pd.Series({'Long name' : info[ticker]['longName'], 'Problem value' : row[0]})
 
   ############################################################################  
   # put together the values for the last 3 dates -> last_date_data
@@ -130,6 +130,8 @@ def compute_indicators_and_summary(info, history_indicators, dividends, splits):
   # long_table.sort_index(key=lambda k:ord(k.str[1]), inplace=True)
   # long_table.sort_index(inplace=True, key=lambda key: stochD_sorting_function(history_indicators[key.str]))
   #.sort_values(by, *, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last', ignore_index=False, key=None)  
+
+  print(problems_df)
   
   return history_indicators, long_table, indicator_info, problems_df
   

@@ -1,4 +1,5 @@
 from datetime import datetime
+import pandas as pd
 
 def time_now():
   result = 'at ' + str(datetime.now())[11:19]
@@ -14,3 +15,8 @@ def get_tail_of_a_column(df, column_name, how_many=1):
   column_index = tail.columns.get_loc(column_name)
   result = tail.iloc[0, column_index] if how_many == 1 else [tail.iloc[how_many-1-h, column_index] for h in range(how_many)]
   return result
+
+def is_nan_or_not_positive(value):
+  result = (pd.isna(value)) or (value < 1E-8)
+  return result
+  
